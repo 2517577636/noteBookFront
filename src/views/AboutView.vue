@@ -1,45 +1,38 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div class="col-6">
-        <div type="button" class="btn btn-primary">支出/收入</div>
-        <span>{{plusAmount}}/{{minusAmount}}</span>
-      </div>
-      <div class="col-6">
-        <SelectComponent :options="months" :defaultSelect="currMonth" @change="changeHandler(arguments)"></SelectComponent>
-      </div>
+    <div class="input-group">
+      <span class="input-group-text btn btn-primary" @click="clickHandler">Submit</span>
+      <textarea class="form-control" aria-label="With textarea" v-model="billArr"></textarea>
     </div>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col" v-for="(key, idx) in keys" :key="idx">{{key}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(bill, idx) in currMonthBillData" :key="idx">
-          <th scope="row">
-            {{idx + 1}}
-          </th>
-          <td v-for="(bValue, bIdx) in bill" :key="bIdx">
-            <div class="input-group">
-             {{bValue}}
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
 <script>
-import SelectComponent from "@/components/SelectComponent.vue"
+// import SelectComponent from "@/components/SelectComponent.vue"
 
 export default {
   name: "AboutView",
+  data() {
+    return {
+      currMonth: undefined,
+      billArr: '{type:0, time:1650286816934, category:"3tqndrjqgrg", amount:3900}'
+    }
+  },
+  methods: {
+    clickHandler() {
+      const instance = this.$axios.create();
+
+      instance.post("http://localhost:3000/create", {
+        billArr: this.billArr
+      }).then( response => {
+        console.log(response);
+      }).catch( err => {
+        console.log(err);
+      }) 
+    }
+  },
   components: {
-    SelectComponent
+    // SelectComponent
   }
 }
 </script>
