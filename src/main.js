@@ -5,7 +5,11 @@ import axios from 'axios'
 
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
-// Vue.use(axios)
+
+const instanceAxios = axios.create({
+  baseURL: "http://localhost:3000"
+})
+Vue.prototype.$axiosInstance = instanceAxios;
 
 new Vue({
   router,

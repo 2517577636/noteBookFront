@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-6">
         <div type="button" class="btn btn-primary">支出/收入</div>
-        <span>{{plusAmount}}/{{minusAmount}}</span>
+        <span>{{plusAmount}} / {{minusAmount}}</span>
       </div>
       <div class="col-6">
         <SelectComponent :options="months" :defaultSelect="currMonth" @change="changeHandler(arguments)"></SelectComponent>
@@ -36,46 +36,35 @@
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
-import SelectComponent from "@/components/SelectComponent.vue"
+import { BILLMODEL } from "@/model/index.js";
+import SelectComponent from "@/components/SelectComponent.vue";
 
 export default {
   name: 'HomeView',
   created() {
+      this.keys = Object.keys(BILLMODEL);
       this.currMonth = this.getCurrMonth();
 
-      const instance = this.$axios.create({
-        headers: {'X-Requested-With': 'XMLHttpRequest'},
-      })
-
-      instance.get("http://localhost:3000/").then((response) => {
+      this.$axiosInstance.get("/").then((response) => {
         let data =  response.data.data.bill;
-        let tempData = {};
-        
-        data.forEach((bill) => {
-            let time = new Date(bill.time),
-                billMonth = time.getMonth() + 1;
-            bill.time = time.toLocaleDateString();
-            if(tempData[billMonth]) {
-              tempData[billMonth].push(bill)
-            } else {
-              tempData[billMonth] = []
-            }
-        });
+        this.totalBill = data;
 
-        console.log("tempData: ", tempData);
-        console.log("currentMonth: ", this.currMonth);
-        this.billData = tempData;
-        this.currMonthBillData = tempData[this.currMonth];
+        if(!data || (Array.isArray(data) && data.length === 0)) {
+          console.error("the totalBill is an empty!");
+          return
+        }
 
-        this.keys = Object.keys(data[0]);
+        this.currMonthBillData = data[this.currMonth];
+      }).catch(e => {
+        console.log(e);
       });
   },
   data() {
     return {
-      keys: [],
-      billData: [],
-      currMonth: undefined,
-      currMonthBillData: [],
+      keys: [], // 表头
+      totalBill: [], // 总账
+      currMonth: undefined, // 当前月份
+      currMonthBillData: [], // 当前月份账单
       months: [
         {
           value: 1,
@@ -126,8 +115,8 @@ export default {
           name: "Dec"
         }
       ],
-      minusAmount: 0,
-      plusAmount: 0
+      minusAmount: 0, // 支出
+      plusAmount: 0 // 收入
     }
   },
   components: {
@@ -144,7 +133,7 @@ export default {
       let selectVal = params[1];
       this.currMonth = selectVal;
 
-      this.currMonthBillData = this.billData[this.currMonth];
+      this.currMonthBillData = this.totalBill[this.currMonth];
       this.getCurrMonthAmount();
     },
 
